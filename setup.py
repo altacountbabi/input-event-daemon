@@ -5,7 +5,7 @@ setup(
     version="0.1",
     entry_points={
         'console_scripts': [
-            "input-event-daemon = input-event-daemon:main"
+            "input-event-daemon = input_event_daemon:main"
         ]
     },
     install_requires=['evdev>=1.2.0', 'pyudev'],
