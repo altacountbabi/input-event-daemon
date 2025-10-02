@@ -68,16 +68,27 @@ def print_devices():
     for path in evdev.list_devices():
         evdevice = evdev.InputDevice(path)
         cap = evdevice.capabilities()
+        
+        # Only process devices that have keys
         if evdev.ecodes.EV_KEY in cap:
-            print("- path : {}".format(evdevice.path))
-            print("  name : {}".format(evdevice.name))
-            keys = [evdev.ecodes.keys[k] for k in cap[evdev.ecodes.EV_KEY]]
-            keys = [k[0] if isinstance(k, list) else k for k in keys]
-            keys = ", ".join(keys)
-            keys = "\n".join(textwrap.wrap(keys, width=65))
-            keys = textwrap.indent(keys, prefix="    ")
+            print(f"- path : {evdevice.path}")
+            print(f"  name : {evdevice.name}")
+            
+            keys = []
+            for k in cap[evdev.ecodes.EV_KEY]:
+                name = evdev.ecodes.keys.get(k, str(k))
+                
+                if isinstance(name, (list, tuple)):
+                    name = name[0]
+                
+                keys.append(str(name))            
+
+            keys_str = ", ".join(keys)
+            keys_str = "\n".join(textwrap.wrap(keys_str, width=65))
+            keys_str = textwrap.indent(keys_str, prefix="    ")
+            
             print("  keys :")
-            print(keys)
+            print(keys_str)
             print()
 
 
@@ -113,7 +124,7 @@ async def log_events(queue):
 
 def probe_devices():
     loop = asyncio.new_event_loop()
-    queue = asyncio.Queue(loop=loop)
+    queue = asyncio.Queue()
     tasks = []
 
     for path in evdev.list_devices():
@@ -124,7 +135,7 @@ def probe_devices():
     t = loop.create_task(log_events(queue))
     tasks.append(t)
 
-    tasks = asyncio.gather(*tasks, loop=loop, return_exceptions=True)
+    tasks = asyncio.gather(*tasks, return_exceptions=True)
 
     def cleanup(signum, frame):
         tasks.cancel()
