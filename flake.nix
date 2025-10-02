@@ -10,7 +10,7 @@
     let
       systems = nixpkgs.lib.platforms.linux;
     in
-    {
+    rec {
       packages = nixpkgs.lib.genAttrs systems (
         system:
         let
@@ -40,5 +40,25 @@
           };
         }
       );
+
+      nixosModules.systemd-service =
+        { config, ... }:
+        {
+          options = { };
+          config = {
+            systemd.services."input-event-daemon" = {
+              description = "Input event daemon";
+              wantedBy = [ "multi-user.target" ];
+
+              serviceConfig = {
+                Type = "simple";
+                ExecStart = "${
+                  packages.${config.system}.default
+                }/bin/input-event-daemon --config=/etc/input-event-daemon.conf";
+              };
+            };
+          };
+        };
+
     };
 }
