@@ -42,7 +42,7 @@
       );
 
       nixosModules.systemd-service =
-        { config, ... }:
+        { pkgs, ... }:
         {
           options = { };
           config = {
@@ -53,7 +53,7 @@
               serviceConfig = {
                 Type = "simple";
                 ExecStart = "${
-                  packages.${config.system}.default
+                  packages.${pkgs.system}.default
                 }/bin/input-event-daemon --config=/etc/input-event-daemon.conf";
               };
             };
