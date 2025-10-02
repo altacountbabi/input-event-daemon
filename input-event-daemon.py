@@ -27,6 +27,8 @@ logger.setLevel(logging.DEBUG)
 def drop_privileges(uid_name='nobody', gid_name='nobody'):
     """Drop user an group for current process."""
     # from https://stackoverflow.com/a/2699996/5786475
+    if os.getuid() != 0:
+        return
 
     # Get the uid/gid from the name
     running_uid = pwd.getpwnam(uid_name).pw_uid
